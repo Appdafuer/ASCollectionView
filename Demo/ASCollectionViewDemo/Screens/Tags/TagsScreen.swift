@@ -7,58 +7,59 @@ struct TagsScreen: View
 {
 	@ObservedObject var store = TagStore()
 
-	/// Used in the extra example that shrinks the collectionView to fit its content
-	var shrinkToSize: Bool = false
-	@State var contentSize: CGSize? // This state variable is handed to the collectionView to allow it to store the content size
-	///
-
 	var body: some View
 	{
-		VStack(alignment: .leading, spacing: 20)
-		{
-			HStack
+		ScrollView(.vertical) {
+			VStack(alignment: .leading, spacing: 20)
 			{
-				Spacer()
-				Text("Tap screen to reload new tags")
+				Text("This screen has an ASCollectionView embedded into a SwiftUI scrollview")
+					.multilineTextAlignment(.center)
+					.fixedSize(horizontal: false, vertical: true)
+					.frame(maxWidth: .infinity)
 					.padding()
-					.background(Color(.secondarySystemBackground))
-				Spacer()
-			}
-			Text("Tags:")
-				.font(.title)
+				HStack
+				{
+					Spacer()
+					Text("Tap this button to reload new tags")
+						.padding()
+						.background(Color(.secondarySystemBackground))
+					Spacer()
+				}
+				.onTapGesture
+				{
+					self.store.refreshStore()
+				}
+				Text("Tags:")
+					.font(.title)
 
-			ASCollectionView(
-				section:
-				ASCollectionViewSection(id: 0, data: store.items)
-				{ item, _ in
-					Text(item.displayString)
-						.fixedSize()
-						.padding(5)
-						.background(Color(.systemGray))
-						.cornerRadius(5)
-			})
+				ASCollectionView(
+					section:
+					ASCollectionViewSection(id: 0, data: store.items)
+					{ item, _ in
+						Text(item.displayString)
+							.fixedSize(horizontal: false, vertical: true)
+							.padding(5)
+							.background(Color(.systemGray))
+							.cornerRadius(5)
+					}.selfSizingConfig { _ in
+						ASSelfSizingConfig(canExceedCollectionWidth: false)
+					}
+				)
 				.layout
-			{
-				let fl = AlignedFlowLayout()
-				fl.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
-				return fl
+				{
+					let fl = AlignedFlowLayout()
+					fl.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
+					return fl
+				}
+				.fitContentSize(dimension: .vertical)
+				Text("This is another view in the VStack, it shows how the collectionView above fits itself to the content.")
+					.padding()
+					.frame(maxWidth: .infinity)
+					.foregroundColor(Color(.secondaryLabel))
+					.fixedSize(horizontal: false, vertical: true)
+					.background(Color(.secondarySystemBackground))
 			}
-			.shrinkToContentSize(isEnabled: shrinkToSize, $contentSize, dimensionToShrink: .vertical)
-
-			if shrinkToSize
-			{
-				Rectangle().fill(Color(.secondarySystemBackground))
-					.overlay(
-						Text("This is another view in the VStack, it shows how the collectionView above fits itself to the content.")
-							.foregroundColor(Color(.secondaryLabel))
-							.padding(),
-						alignment: .topLeading)
-			}
-		}
-		.padding()
-		.onTapGesture
-		{
-			self.store.refreshStore()
+			.padding()
 		}
 		.navigationBarTitle("Tags", displayMode: .inline)
 	}
@@ -68,12 +69,7 @@ class AlignedFlowLayout: UICollectionViewFlowLayout
 {
 	override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool
 	{
-		if let collectionView = self.collectionView
-		{
-			return collectionView.frame.width != newBounds.width // We only care about changes in the width
-		}
-
-		return false
+		true
 	}
 
 	override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]?
