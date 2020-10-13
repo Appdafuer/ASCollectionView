@@ -18,6 +18,7 @@ public struct ASCollectionView<SectionID: Hashable>: UIViewControllerRepresentab
 
 	public var layout: Layout = .default
 	public var sections: [Section]
+    public var pagingWidth:CGFloat?
 
 	// MARK: Internal variables modified by modifier functions
 
@@ -854,6 +855,13 @@ extension ASCollectionView.Coordinator
 		parent.onScrollCallback?(scrollView.contentOffset, scrollView.contentSizePlusInsets)
 		checkIfReachedBoundary(scrollView)
 	}
+    
+    public func scrollViewWillEndDragging(_ scrollView: UIScrollView, velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+            guard let pagingWidth = parent.pagingWidth, scrollView.contentOffset.x + scrollView.frame.size.width < scrollView.contentSize.width else { return }
+            
+            let index: CGFloat = CGFloat(round(targetContentOffset.pointee.x / pagingWidth))
+            targetContentOffset.pointee.x = index * pagingWidth
+    }
 
 	func checkIfReachedBoundary(_ scrollView: UIScrollView)
 	{
@@ -927,6 +935,7 @@ internal protocol ASCollectionViewCoordinator: AnyObject
 	func collectionView(_ collectionView: UICollectionView, performDropWith coordinator: UICollectionViewDropCoordinator)
 	func didUpdateContentSize(_ size: CGSize)
 	func scrollViewDidScroll(_ scrollView: UIScrollView)
+    func scrollViewWillEndDragging(_ scrollView: UIScrollView, velocity:CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>)
 	func onMoveToParent()
 	func onMoveFromParent()
 }

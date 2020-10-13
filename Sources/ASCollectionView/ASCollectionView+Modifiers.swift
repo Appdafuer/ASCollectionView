@@ -15,6 +15,12 @@ public extension ASCollectionView
 		cv.delegateInitialiser = delegateInitialiser
 		return cv
 	}
+    
+    func paging(_ width:CGFloat) -> Self {
+        var this = self
+        this.pagingWidth = width
+        return this
+    }
 }
 
 // MARK: Modifer: Layout Invalidation

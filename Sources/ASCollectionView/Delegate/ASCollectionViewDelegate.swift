@@ -93,6 +93,10 @@ extension ASCollectionViewDelegate: UICollectionViewDragDelegate, UICollectionVi
 	{
 		coordinator?.scrollViewDidScroll(scrollView)
 	}
+    
+    public func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        coordinator?.scrollViewWillEndDragging(scrollView, velocity: velocity, targetContentOffset: targetContentOffset)
+    }
 }
 
 @available(iOS 13.0, *)
